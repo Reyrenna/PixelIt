@@ -1,0 +1,156 @@
+﻿@* @model GetPostViewModel *@
+@* @{ *@
+@*     ViewData["Title"] = "Home Page"; *@
+@* } *@
+@* <div class="row text-center"> *@
+@*     <h1>Your Favourite Content</h1> *@
+@* </div> *@
+@* <div class="container"> *@
+@*     <div class="row"> *@
+@*         <div class="col-md-4 mb-4"> *@
+@*             <div class="card card-pixelit"> *@
+@*                 <div class="image-container"> *@
+@*                     <div class="overlay"> *@
+@*                         <button class="like-button" onclick="@ViewBag.Posts.IsLike" data-post-id="@ViewBag.Posts.IdPost" data-liked="@ViewBag.Posts.IdUser.Tolist().ToLower()"> *@
+@*                             <i class="@(ViewBag.Posts.IsLike ? "bi bi-heart-fill" : "bi bi-heart")"></i> *@
+@*                         </button> *@
+@*                     </div> *@
+@*                     <img src="https://placecats.com/millie/300/150" alt="Placeholder Image" class="card-img"> *@
+@*                 </div> *@
+@*                 <div class="card-body"> *@
+@*                     <div class="row"> *@
+@*                         <div class="col-2"> *@
+@*                             <a class="rounded ">O</a> *@
+@*                         </div> *@
+@*                         <div class="col-8"> *@
+@*                             <a>nome del creator</a> *@
+@*                         </div> *@
+@*                         <div class="col-2"> *@
+@*                             <button>...</button> *@
+@*                         </div> *@
+@*                     </div> *@
+                    
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*          <div class="col-md-4"> *@
+@*             <div class="card card-width"> *@
+@*                 <div class="card-img-top justify-content-center" style="max-height: 20vh"> *@
+@*                     <img src="https://placecats.com/millie/300/150" alt="Placeholder Image" class="img-fluid mh-100"> *@
+@*                 </div> *@
+@*                 <div class="card-body"> *@
+@*                     <div class="row"> *@
+@*                         <div class="col-2"> *@
+@*                             <a class="rounded ">O</a> *@
+@*                         </div> *@
+@*                         <div class="col-8"> *@
+@*                             <a>nome del creator</a> *@
+@*                         </div> *@
+@*                         <div class="col-2"> *@
+@*                             <button>...</button> *@
+@*                         </div> *@
+@*                     </div> *@
+                    
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*         <div class="col-md-4"> *@
+@*             <div class="card card-width"> *@
+@*                 <div class="card-img-top p-2 container-fluid"> *@
+@*                     <img src="https://placecats.com/millie/300/150" alt="Placeholder Image" class="img-fluid"> *@
+@*                 </div> *@
+@*                 <div class="card-body"> *@
+@*                     <div class="row"> *@
+@*                         <div class="col-2"> *@
+@*                             <a class="rounded ">O</a> *@
+@*                         </div> *@
+@*                         <div class="col-8"> *@
+@*                             <a>nome del creator</a> *@
+@*                         </div> *@
+@*                         <div class="col-2"> *@
+@*                             <button>...</button> *@
+@*                         </div> *@
+@*                     </div> *@
+
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*         <div class="col-md-4"> *@
+@*             <div class="card card-width"> *@
+@*                 <div class="card-img-top"> *@
+@*                     <img src="https://placecats.com/millie/300/150" alt="Placeholder Image" class="img-fluid"> *@
+@*                 </div> *@
+@*                 <div class="card-body"> *@
+@*                     <div class="row"> *@
+@*                         <div class="col-2"> *@
+@*                             <a class="rounded ">O</a> *@
+@*                         </div> *@
+@*                         <div class="col-8"> *@
+@*                             <a>nome del creator</a> *@
+@*                         </div> *@
+@*                         <div class="col-2"> *@
+@*                             <button>...</button> *@
+@*                         </div> *@
+@*                     </div> *@
+
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+
+@* @section Scripts { *@
+@*     <script> *@
+@*         $(document).ready(function() { *@
+@*             // Gestione immagini orizzontali vs verticali *@
+@*             $('.card-img').each(function() { *@
+@*                 const img = $(this); *@
+@*                 img.on('load', function() { *@
+@*                     const aspectRatio = this.naturalWidth / this.naturalHeight; *@
+@*                     const container = img.closest('.image-container'); *@
+
+@*                     if (aspectRatio > 1) { *@
+@*                         container.addClass('horizontal').removeClass('vertical'); *@
+@*                     } else { *@
+@*                         container.addClass('vertical').removeClass('horizontal'); *@
+@*                     } *@
+@*                 }); *@
+
+@*                 // Trigger load event per immagini già caricate *@
+@*                 if (this.complete) { *@
+@*                     $(this).trigger('load'); *@
+@*                 } *@
+@*             }); *@
+
+@*             // Gestione click sul cuore (like) *@
+@*             $('.like-button').click(function(e) { *@
+@*                 e.preventDefault(); *@
+@*                 e.stopPropagation(); *@
+
+@*                 const button = $(this); *@
+@*                 const postId = button.data('post-id'); *@
+@*                 const icon = button.find('i'); *@
+
+@*                 // Cambia l'aspetto del cuore all'istante (feedback visivo) *@
+@*                 const isCurrentlyLiked = button.data('liked') === true; *@
+@*                 if (!isCurrentlyLiked) { *@
+@*                     icon.addClass('-fill'); *@
+@*                     button.data('liked', true); *@
+@*                 } else { *@
+@*                     icon.removeClass('-fill'); *@
+@*                     button.data('liked', false); *@
+@*                 } *@
+
+@*                 // Qui puoi aggiungere la chiamata AJAX per salvare il like (se necessario) *@
+@*                 // $.ajax({ *@
+@*                 //     url: '/Home/ToggleLike', *@
+@*                 //     type: 'POST', *@
+@*                 //     data: { postId: postId }, *@
+@*                 //     success: function(response) { *@
+@*                 //         // Gestione della risposta *@
+@*                 //     } *@
+@*                 // }); *@
+@*             }); *@
+@*         }); *@
+@*     </script> *@
+@* } *@
