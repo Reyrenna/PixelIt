@@ -12,6 +12,9 @@ namespace PixelIt.DTOs.Account
     public class GetUserDto
     {
         [Required]
+        public string IdUser { get; set; }
+
+        [Required]
         public required string Name { get; set; }
 
         [Required]

@@ -86,7 +86,7 @@ namespace PixelIt.Services
                         {
                             IdLike = l.IdLike, // Aggiunto IdLike
                             LikeDate = l.LikeDate,
-                            IdPost = l.IdPost.ToString(),
+                            IdPost = l.IdPost,
                             IdUser = l.IdUser,
                             User = new UserPostDto()
                             {
@@ -98,7 +98,7 @@ namespace PixelIt.Services
                         Comments = p.Comments.Select(c => new CommentSimpleDto()
                         {
                             IdComment = c.IdComment, // Aggiunto IdComment
-                            IdPost = c.IdPost.ToString(),
+                            IdPost = c.IdPost,
                             UserId = c.IdUser,
                             CommentDate = c.CommentDate,
                             CommentText = c.CommentText,
@@ -171,7 +171,7 @@ namespace PixelIt.Services
                     {
                         IdLike = l.IdLike,
                         LikeDate = l.LikeDate,
-                        IdPost = l.IdPost.ToString(),
+                        IdPost = l.IdPost,
                         IdUser = l.IdUser,
                         User = new UserPostDto()
                         {
@@ -183,7 +183,7 @@ namespace PixelIt.Services
                     Comments = post.Comments.Select(c => new CommentSimpleDto()
                     {
                         IdComment = c.IdComment,
-                        IdPost = c.IdPost.ToString(),
+                        IdPost = c.IdPost,
                         UserId = c.IdUser,
                         CommentDate = c.CommentDate,
                         CommentText = c.CommentText,
@@ -253,7 +253,7 @@ namespace PixelIt.Services
                     {
                         IdLike = l.IdLike,
                         LikeDate = l.LikeDate,
-                        IdPost = l.IdPost.ToString(),
+                        IdPost = l.IdPost,
                         IdUser = l.IdUser,
                         User = new UserPostDto()
                         {
@@ -265,7 +265,7 @@ namespace PixelIt.Services
                     Comments = p.Comments.Select(c => new CommentSimpleDto()
                     {
                         IdComment = c.IdComment,
-                        IdPost = c.IdPost.ToString(),
+                        IdPost = c.IdPost,
                         UserId = c.IdUser,
                         CommentDate = c.CommentDate,
                         CommentText = c.CommentText,

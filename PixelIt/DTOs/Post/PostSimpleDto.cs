@@ -11,6 +11,9 @@ namespace PixelIt.DTOs.Post
     {
 
         [Required]
+        public Guid IdPost { get; set; }
+
+        [Required]
         public required string PostImage { get; set; }
 
         public string? NewPostImage { get; set; }
@@ -29,11 +32,9 @@ namespace PixelIt.DTOs.Post
 
         public virtual ICollection<CommentSimpleDto> Comments { get; set; }
 
-        [Required]
-        public required string Nickname { get; set; }
+        public string Nickname { get; set; }
 
-        [Required]
-        public required string ProfilePicture { get; set; }
+        public string ProfilePicture { get; set; }
 
         [Required]
         public UserPostDto User { get; set; }

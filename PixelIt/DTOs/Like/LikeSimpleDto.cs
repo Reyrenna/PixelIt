@@ -15,11 +15,10 @@ namespace PixelIt.DTOs.Like
         public bool IsLike { get; set; }
         public int LikeCount { get; set; }
 
-        [Required]
         public string IdUser { get; set; }
 
         [Required]
-        public string IdPost { get; set; }
+        public Guid IdPost { get; set; }
         public UserPostDto User { get; set; }
         public PostSimpleDto Post { get; set; }
 

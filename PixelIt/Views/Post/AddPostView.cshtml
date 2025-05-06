@@ -5,6 +5,7 @@
 }
 
 <form enctype="multipart/form-data" asp-action="CreatePost" method="post" class="container-fluid">
+	@Html.AntiForgeryToken()
     <div class="mb-3">
         <label asp-for="Post.PostImage" class="form-label">Post Image</label>
         <input type="file" asp-for="Post.PostImage" />

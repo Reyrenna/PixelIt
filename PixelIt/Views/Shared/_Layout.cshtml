@@ -24,10 +24,10 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Post" asp-action="AddPostView">Privacy</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Post" asp-action="CreatePost">Privacy</a>
                         </li>
                         <li class="nav-item"> 
-                           <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="AddAccountView">Privacy</a> 
+                           <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Registration">Privacy</a> 
                         </li>
                     </ul>
                 </div>
@@ -47,6 +47,7 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/popperjs/popper.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

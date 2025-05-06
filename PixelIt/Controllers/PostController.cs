@@ -12,9 +12,8 @@ using System.Security.Claims;
 
 namespace PixelIt.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Richiede autenticazione per tutte le azioni
+    [Route("api/[controller]")]
     public class PostController : Controller
     {
         private readonly PostService _postService;
@@ -29,7 +28,6 @@ namespace PixelIt.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous] // Permette accesso anonimo per visualizzare i post
         public async Task<IActionResult> GetAll()
         {
             try
@@ -41,7 +39,6 @@ namespace PixelIt.Controllers
                 }
 
                 return Ok(posts);
-                ViewBag.Posts = posts;
             }
             catch (Exception ex)
             {
@@ -50,7 +47,6 @@ namespace PixelIt.Controllers
         }
 
         [HttpGet("{postId:guid}")]
-        [AllowAnonymous] // Permette accesso anonimo per visualizzare un singolo post
         public async Task<IActionResult> GetById(Guid postId)
         {
             try
@@ -70,7 +66,6 @@ namespace PixelIt.Controllers
         }
 
         [HttpGet("user/{userId}")]
-        [AllowAnonymous] // Permette accesso anonimo per visualizzare i post di un utente
         public async Task<IActionResult> GetByUserId(string userId)
         {
             try
@@ -114,7 +109,7 @@ namespace PixelIt.Controllers
             }
         }
 
-        [HttpPost("create")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreatePost(CreatePostDto postDto)
         {

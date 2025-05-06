@@ -16,13 +16,12 @@ namespace PixelIt.DTOs.Comment
         public DateTime CommentDate { get; set; }
 
         [Required]
-        public string IdPost { get; set; }
+        public Guid IdPost { get; set; }
 
-        [Required]
         public string UserId { get; set; }
 
-        public required UserPostDto User { get; set; }
+        public UserPostDto User { get; set; }
 
-        public required PostCommentDto Post { get; set; }
+        public PostCommentDto Post { get; set; }
     }
 }

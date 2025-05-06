@@ -28,7 +28,7 @@ namespace PixelIt.Services
             }
         }
       
-        public async Task<bool> CreateImageCollection(ImageCollectionSimpleDto createImageCollection)
+        public async Task<bool>? CreateImageCollection(ImageCollectionSimpleDto createImageCollection)
         {
             try
             {
