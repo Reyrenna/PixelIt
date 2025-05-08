@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using PixelIt.DTOs.Account;
 using PixelIt.DTOs.Category;
 using PixelIt.DTOs.Like;
@@ -9,6 +10,7 @@ using PixelIt.DTOs.PostCategory;
 using PixelIt.Models;
 using PixelIt.Services;
 using PixelIt.ViewModel.Post;
+using PixelIt.ViewModel.User;
 using System.Security.Claims;
 
 namespace PixelIt.Controllers
@@ -119,44 +121,120 @@ namespace PixelIt.Controllers
                 TempData["ErrorMessage"] = "Utente non autenticato";
                 return RedirectToAction("Login", "Account");
             }
-            var createPostDto = new CreatePostDto();
+            //var createPost = new CreatePostDto();
+            var createPost = new AddPostViewModel
+            {
+                Post = new CreatePostDto(),
+                Categories = new CreateCategoryDto(),
+            };
             ViewBag.Categories = await _categoryService.GetCategories();
-            return View("Create", createPostDto);
+            return View( createPost);
 
         }
 
 
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreatePost([FromForm]CreatePostDto createPost)
+        public async Task<IActionResult> CreatePost(AddPostViewModel createPost)
         {
-            if (!ModelState.IsValid)
-            {
-                return await ReturnCreateViewWithCategoriesAsync(createPost);
-            }
-
-            var user = await _userManager.GetUserAsync(User);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
                 TempData["ErrorMessage"] = "Utente non autenticato";
                 return RedirectToAction("Login", "Account");
             }
-            var postCreated = await _postService.CreatePostAsync(createPost, user.Id);
+
+            if (createPost == null || createPost.Post == null)
+            {
+                ModelState.AddModelError("", "Dati del post non validi");
+                return View("Create", new AddPostViewModel { Post = new CreatePostDto(), Categories = new CreateCategoryDto() });
+            }
+
+            string webRootPath = null;
+            try
+            {
+                if (createPost.Post.PostImage != null && createPost.Post.PostImage.Length > 0)
+                {
+                    var fileName = Path.GetFileName(createPost.Post.PostImage.FileName);
+                    var uniqueFileName = Guid.NewGuid() + "_" + fileName;
+                    var directory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "images");
+
+                    if (!Directory.Exists(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+                    var filePath = Path.Combine(directory, uniqueFileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await createPost.Post.PostImage.CopyToAsync(stream);
+                    }
+
+                    webRootPath = Path.Combine("uploads", "images", uniqueFileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Errore durante il caricamento dell'immagine: " + ex.Message);
+                return View("Create", new AddPostViewModel { Post = new CreatePostDto(), Categories = new CreateCategoryDto() });
+            }
+
+            var postDto = new Post
+            {
+                IdPost = Guid.NewGuid(),
+                Description = createPost.Post.Description,
+                PostDate = DateTime.UtcNow,
+                PostImage = webRootPath,
+                IdUser = user.Id,
+                PostCategories = (ICollection<PostCategory>)createPost.Post.PostCategories,
+                User = user
+            };
+
+            // Salva il post nel database
+            var postCreated = await _postService.SavePost(postDto);
             if (!postCreated)
             {
                 ModelState.AddModelError("", "Errore durante la creazione del post");
-                return await ReturnCreateViewWithCategoriesAsync(createPost);
+                return View("Create", new AddPostViewModel { Post = new CreatePostDto(), Categories = new CreateCategoryDto() });
             }
+            //if (!ModelState.IsValid)
+            //{
+            //    return await ReturnCreateViewWithCategoriesAsync(createPost);
+            //}
+            //var postCreated = await _postService.CreatePostAsync(createPost);
+            //if (!postCreated)
+            //{
+            //    ModelState.AddModelError("", "Errore durante la creazione del post");
+            //    return await ReturnCreateViewWithCategoriesAsync(createPost);
+            //}
 
             TempData["SuccessMessage"] = "Post creato con successo!";
             return RedirectToAction("Index", "Home");
         }
 
-        private async Task<IActionResult> ReturnCreateViewWithCategoriesAsync(CreatePostDto postDto)
+        [HttpGet]
+        public async Task<IActionResult> Index(GetPostViewModel getPost)
         {
-            ViewBag.Categories = await _categoryService.GetCategories();
-            return View("Create", postDto);
+            try
+            {
+                var posts = await _postService.GetPostView();
+                if (posts == null || !posts.Any())
+                {
+                    return NotFound(new { message = "Nessun post trovato" });
+                }
+                return View("Index", posts);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Errore durante il recupero dei post", error = ex.Message });
+            }
         }
+        //private async Task<IActionResult> ReturnCreateViewWithCategoriesAsync(CreatePostDto postDto)
+        //{
+        //    ViewBag.Categories = await _categoryService.GetCategories();
+        //    return View("Create", postDto);
+        //}
 
         // Vista MVC per l'aggiornamento di un post
         //[HttpGet("edit/{idPost:guid}")]

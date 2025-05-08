@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.ComponentModel;
+using System.Linq.Expressions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PixelIt.Data;
@@ -9,6 +10,7 @@ using PixelIt.DTOs.Like;
 using PixelIt.DTOs.Post;
 using PixelIt.DTOs.PostCategory;
 using PixelIt.Models;
+using PixelIt.ViewModel.Post;
 
 namespace PixelIt.Services
 {
@@ -43,6 +45,56 @@ namespace PixelIt.Services
                 // Log dell'errore specifico
                 Console.WriteLine($"Errore di aggiornamento database: {ex.Message}");
                 return false;
+            }
+        }
+
+        public async Task<bool> SavePost(Post post)
+        {
+            try
+            {
+                _context.Posts.Add(post);
+                return await TryPostSaveAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Errore durante il salvataggio del post", ex);
+            }
+        }
+
+        public async Task<List<GetPostViewModel>> GetPostView()
+        {
+            try
+            {
+                var postList = await _context
+                    .Posts
+                    .Include(p => p.User)
+                    .Include(p => p.Comments)
+                        .ThenInclude(c => c.User)
+                    .Include(p => p.Likes)
+                        .ThenInclude(l => l.User)
+                    .Include(p => p.PostCategories)
+                        .ThenInclude(pc => pc.Category)
+                    .OrderByDescending(p => p.PostDate) // Ordina i post più recenti prima
+                    .ToListAsync();
+                var postDtoList = postList
+                    .Select(p => new GetPostViewModel()
+                    {
+                        IdPost = p.IdPost,
+                        PostImage = p.PostImage,
+                        Description = p.Description,
+                        IdUser = p.IdUser,
+                        User = new UserPostDto()
+                        {
+                            Id = p.User.Id,
+                            Nickname = p.User.Nickname,
+                            ProfilePicture = p.User.ProfilePicture
+                        }
+                    }).ToList();
+                return postDtoList;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Errore durante il recupero dei post", ex);
             }
         }
 
@@ -278,11 +330,17 @@ namespace PixelIt.Services
             }
         }
 
-        public async Task<bool> CreatePostAsync(CreatePostDto createPost, string userId)
+        public async Task<bool> CreatePostAsync(CreatePostDto createPost)
         {
             try
             {
-                string webRootPath = null;
+                 var user = await _userManager.FindByIdAsync(createPost.User.Id);
+                if (user == null)
+                {
+                    return false;
+                }
+
+                    string webRootPath = null;
 
                 // Gestione dell'immagine se presente
                 if (createPost.PostImage != null)
@@ -305,44 +363,45 @@ namespace PixelIt.Services
 
                     webRootPath = Path.Combine("uploads", "images", uniqueFileName);
                 }
-                var newCategory = new Category();
+                //var newCategory = new Category();
                 var newPost = new Post()
                 {
                     IdPost = Guid.NewGuid(),
                     Description = createPost.Description,
                     PostDate = DateTime.UtcNow,
                     PostImage = webRootPath,
-                    IdUser = userId
+                    IdUser = user.Id,
+                    User = user
                 };
 
                 // Aggiunta delle categorie esistenti
-                if (createPost.PostCategories != null && createPost.Categories.Count > 0)
-                {
-                    foreach (var pcDto in createPost.Categories)
-                    {
-                                // Controlla se la categoria esiste già
-                                var existingCategory = await _context.Categories
-                                    .FirstOrDefaultAsync(c => c.CategoryName == pcDto.CategoryName);
+                //if (createPost.PostCategories != null && createPost.Categories.Count > 0)
+                //{
+                //    foreach (var pcDto in createPost.Categories)
+                //    {
+                //                // Controlla se la categoria esiste già
+                //                var existingCategory = await _context.Categories
+                //                    .FirstOrDefaultAsync(c => c.CategoryName == pcDto.CategoryName);
 
-                                if (existingCategory == null)
-                                {
-                                    // Crea una nuova categoria se non esiste
-                                    existingCategory = new Category
-                                    {
-                                        IdCategory = Guid.NewGuid(),
-                                        CategoryName = pcDto.CategoryName
-                                    };
-                                    _context.Categories.Add(existingCategory);
-                                }
+                //                if (existingCategory == null)
+                //                {
+                //                    // Crea una nuova categoria se non esiste
+                //                    existingCategory = new Category
+                //                    {
+                //                        IdCategory = Guid.NewGuid(),
+                //                        CategoryName = pcDto.CategoryName
+                //                    };
+                //                    _context.Categories.Add(existingCategory);
+                //                }
 
-                                // Aggiungi la relazione PostCategory
-                                newPost.PostCategories.Add(new PostCategory
-                                {
-                                    PostId = newPost.IdPost,
-                                    CategoryId = existingCategory.IdCategory
-                                });
-                            }
-                }
+                //                // Aggiungi la relazione PostCategory
+                //                newPost.PostCategories.Add(new PostCategory
+                //                {
+                //                    PostId = newPost.IdPost,
+                //                    CategoryId = existingCategory.IdCategory
+                //                });
+                //            }
+                //}
 
                 // Aggiungi il post al contesto
                 _context.Posts.Add(newPost);

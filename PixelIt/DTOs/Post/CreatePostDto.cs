@@ -21,6 +21,8 @@ namespace PixelIt.DTOs.Post
         public virtual ICollection<GetCategoriesDto>? Categories { get; set; }
 
         [Required]
+        public string IdUser { get; set; }
+
         public UserPostDto User { get; set; } 
 
     }

@@ -1,7 +1,39 @@
-﻿@* @model GetPostViewModel *@
+﻿@model List<GetPostViewModel>
 @{
     ViewData["Title"] = "Home Page";
 }
+
+<div class="row text-center">
+    <h1>Your Favourite Content</h1>
+</div>
+<div class=" container">
+    <div class="row">
+        @foreach( var post in Model)
+        {
+            <div class="col-md-3 mb-3">
+                <div class="card card-pixelit">
+                    <div class="image-container">
+                        <img src="@post.PostImage" class="card-img" />
+                    </div>
+                    <div class="card-body">
+                        <div class="row"> 
+                       <div class="col-2">
+                             <a class="rounded " style="width: 20px; height: 20px; border-radius: 50%;">@post.User.ProfilePicture</a> 
+                         </div> 
+                         <div class="col-8"> 
+                             <a>@post.User.Nickname</a> 
+                         </div> 
+                         <div class="col-2"> 
+                             <button>...</button> 
+                         </div> 
+                     </div> 
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
 @* <div class="row text-center"> *@
 @*     <h1>Your Favourite Content</h1> *@
 @* </div> *@

@@ -1,0 +1,40 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using PixelIt.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="dropdownMenuButton" role="button" data-toggle="dropdown">
+            <i class="fas fa-user-circle"></i> <img src="@UserManager.FindByNameAsync(User.Identity.Name).Result.ProfilePicture" style="height: 50px; width: 50px; border-radius: 50%; border:solid 2px black"/>
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <li class="dropdown-item">
+                <a asp-controller="Home" asp-action="Index">Il mio profilo</a>
+            </li>
+            <li class="dropdown-divider"></li>
+            <li class="dropdown-item">
+                <form asp-controller="User" asp-action="Logout" method="post">
+                    <button type="submit" >Logout</button>
+                </form>
+            </li>
+            
+        </ul>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="User" asp-action="Login">
+            <i class="fas fa-sign-in-alt"></i> Login
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="User" asp-action="Registration">
+            <i class="fas fa-user-plus"></i> Registrati
+        </a>
+    </li>
+}

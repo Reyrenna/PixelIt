@@ -57,21 +57,6 @@ namespace PixelIt.Controllers
 
                 if (model.CreateUser.ProfilePicture != null && model.CreateUser.ProfilePicture.Length > 0)
                 {
-                    //    var existingUser = await _userManager.FindByEmailAsync(model.Email);
-                    //    if (ModelState.IsValid && existingUser == null)
-                    //    {
-                    //        var result = (IActionResult)await _userService.CreateUserAsync(model, password, pp, vi1, vi2, roleName);
-                    //        await _signInManager.SignInAsync((ApplicationUser)result, isPersistent: false);
-
-                    //        return RedirectToAction("Index", "Home");
-                    //    }
-                    //    else
-                    //    {
-                    //        ModelState.AddModelError("CreateUser.Email", "Questa email è già registrata");
-                    //        return View("Registration", model);
-                    //    }
-
-                    //}
 
                     // Gestisci l'immagine del profilo
                     try
@@ -230,11 +215,11 @@ namespace PixelIt.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.LogInUser.Email, model.LogInUser.Password, isPersistent: false, lockoutOnFailure: false);
+                var result = await _signInManager.PasswordSignInAsync(model.LogInUser.Email, model.LogInUser.Password,isPersistent: false, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("Utente {Email} ha effettuato il login con successo", model.LogInUser.Email);
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction(nameof(HomeController.Index), "Home");
                 }
                 else
                 {
@@ -242,6 +227,12 @@ namespace PixelIt.Controllers
                 }
             }
             return View("Login", model);
+        }
+        [HttpPost]
+        public async Task<IActionResult> LogOut()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
         }
     }
 }

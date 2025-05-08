@@ -10,10 +10,8 @@ namespace PixelIt.DTOs.Account
 
         public string Surname { get; set; }
 
-        [Required]
         public string Nickname { get; set; }
 
-        [Required]
         public string ProfilePicture { get; set; }
 
 

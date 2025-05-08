@@ -1,5 +1,5 @@
-﻿@using PixelIt.DTOs.Post
-@model CreatePostDto
+﻿@using PixelIt.ViewModel
+@model AddPostViewModel
 
 @{ 
     ViewData["Title"] = "Add Post";
@@ -8,15 +8,15 @@
 <form enctype="multipart/form-data" asp-action="CreatePost" method="post" class="container-fluid">
     @Html.AntiForgeryToken()
     <div class="mb-3">
-        <label asp-for="PostImage" class="form-label">Post Image</label>
-        <input type="file" asp-for="PostImage" />
+        <label asp-for="Post.PostImage" class="form-label">Post Image</label>
+        <input type="file" asp-for="Post.PostImage" />
         <small class="form-text text-muted">Insert here your Image</small>
-        <span asp-validation-for="PostImage" class="text-danger"></span>
+        <span asp-validation-for="Post.PostImage" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label asp-for="Description" class="form-label">Post Description</label>
-        <input asp-for="Description" class="form-control" />
-        <span asp-validation-for="Description" class="text-danger"></span>
+        <label asp-for="Post.Description" class="form-label">Post Description</label>
+        <input asp-for="Post.Description" class="form-control" />
+        <span asp-validation-for="Post.Description" class="text-danger"></span>
     </div>
   @*  <div class="mb-3">
             <div class="mb-3">
