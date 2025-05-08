@@ -60,8 +60,8 @@ namespace PixelIt.DTOs.Account
         [StringLength(30, ErrorMessage = "Il nickname non può superare i 30 caratteri")]
         public string Nickname { get; set; }
 
-        [Required(ErrorMessage = "L'immagine del profilo è obbligatoria")]
-        public IFormFile ProfilePicture { get; set; }
+        //[Required(ErrorMessage = "L'immagine del profilo è obbligatoria")]
+        public IFormFile? ProfilePicture { get; set; }
 
         public string? ProfileDescription { get; set; }
 
@@ -77,9 +77,9 @@ namespace PixelIt.DTOs.Account
 
         [Required(ErrorMessage = "La data di nascita è obbligatoria")]
         [DataType(DataType.Date)]
-        public DateTime DateOfBirth { get; set; } // Cambiato da DateOnly a DateTime
+        public DateTime DateOfBirth { get; set; } 
 
-        // Rimosso required keyword per compatibilità
-        public IFormFileCollection ImageCollections { get; set; } // Cambiato il tipo
+        public IFormFile? VerificationImage1 { get; set; }
+        public IFormFile? VerificationImage2 { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using PixelIt.DTOs.Account;
+using PixelIt.DTOs.Category;
 using PixelIt.DTOs.Comment;
 using PixelIt.DTOs.Like;
 using PixelIt.DTOs.PostCategory;
@@ -23,11 +24,11 @@ namespace PixelIt.DTOs.Post
         [Required]
         public required DateTime PostDate { get; set; }
 
-        public virtual ICollection<PostCategorySimpleDto> PostCategories { get; set; }
+        public virtual ICollection<GetCategoriesDto>? PostCategories { get; set; }
 
-        public virtual ICollection<LikeSimpleDto> Likes { get; set; }
+        public virtual ICollection<LikeSimpleDto>? Likes { get; set; }
 
-        public virtual ICollection<CommentSimpleDto> Comments { get; set; }
+        public virtual ICollection<CommentSimpleDto>? Comments { get; set; }
 
         [Required]
         public string IdUser { get; set; }

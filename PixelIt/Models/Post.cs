@@ -20,7 +20,7 @@ namespace PixelIt.Models
         
         public string PostImage { get; set; }
 
-        public string NewPostImage { get; set; }
+        public string? NewPostImage { get; set; }
 
         public virtual ICollection<PostCategory>? PostCategories { get; set; }
 

@@ -82,16 +82,17 @@ namespace PixelIt.Models
 
         public string? ProfileDescription { get; set; }
 
-        [Required]
-        public string ProfilePicture { get; set; }
+        public string? ProfilePicture { get; set; }
+
+        public string? VerificationImage1 { get; set; }
+
+        public string? VerificationImage2 { get; set; }
 
         [Required]
         public DateTime DateOfBirth { get; set; } // Cambiato da DateOnly a DateTime per compatibilità
 
         [Required]
         public DateTime DateOfRegistration { get; set; }
-
-        public virtual ICollection<ImageCollection>? ImageCollections { get; set; }
         public virtual ICollection<Post>? Posts { get; set; }
         public virtual ICollection<Comment>? Comments { get; set; }
         public virtual ICollection<Like>? Likes { get; set; }

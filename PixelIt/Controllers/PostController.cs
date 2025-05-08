@@ -8,12 +8,12 @@ using PixelIt.DTOs.Post;
 using PixelIt.DTOs.PostCategory;
 using PixelIt.Models;
 using PixelIt.Services;
+using PixelIt.ViewModel.Post;
 using System.Security.Claims;
 
 namespace PixelIt.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
+    [Authorize]
     public class PostController : Controller
     {
         private readonly PostService _postService;
@@ -27,109 +27,125 @@ namespace PixelIt.Controllers
             _userManager = userManager;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            try
-            {
-                List<GetPost>? posts = await _postService.GetPost();
-                if (posts == null || !posts.Any())
-                {
-                    return NotFound(new { message = "Nessun post trovato" });
-                }
+        //[HttpGet]
+        //public async Task<IActionResult> GetAll()
+        //{
+        //    try
+        //    {
+        //        List<GetPost>? posts = await _postService.GetPost();
+        //        if (posts == null || !posts.Any())
+        //        {
+        //            return NotFound(new { message = "Nessun post trovato" });
+        //        }
 
-                return Ok(posts);
-            }
-            catch (Exception ex)
+        //        return Ok(posts);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { message = "Errore durante il recupero dei post", error = ex.Message });
+        //    }
+        //}
+
+        //[HttpGet("{postId:guid}")]
+        //public async Task<IActionResult> GetById(Guid postId)
+        //{
+        //    try
+        //    {
+        //        var post = await _postService.GetPostByIdAsync(postId);
+        //        if (post == null)
+        //        {
+        //            return NotFound(new { message = "Post non trovato" });
+        //        }
+
+        //        return Ok(post);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { message = "Errore durante il recupero del post", error = ex.Message });
+        //    }
+        //}
+
+        //[HttpGet("user/{userId}")]
+        //public async Task<IActionResult> GetByUserId(string userId)
+        //{
+        //    try
+        //    {
+        //        var posts = await _postService.GetPostsByUserIdAsync(userId);
+        //        if (posts == null || !posts.Any())
+        //        {
+        //            return NotFound(new { message = "Nessun post trovato per questo utente" });
+        //        }
+
+        //        return Ok(posts);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { message = "Errore durante il recupero dei post dell'utente", error = ex.Message });
+        //    }
+        //}
+
+        //[HttpGet("my-posts")]
+        //public async Task<IActionResult> GetMyPosts()
+        //{
+        //    try
+        //    {
+        //        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        //        if (string.IsNullOrEmpty(userId))
+        //        {
+        //            return Unauthorized(new { message = "Utente non autenticato" });
+        //        }
+
+        //        var posts = await _postService.GetPostsByUserIdAsync(userId);
+        //        if (posts == null || !posts.Any())
+        //        {
+        //            return NotFound(new { message = "Non hai ancora pubblicato post" });
+        //        }
+
+        //        return Ok(posts);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { message = "Errore durante il recupero dei tuoi post", error = ex.Message });
+        //    }
+        //}
+
+
+        [HttpGet("create")]
+        public async Task<IActionResult> Create()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
             {
-                return StatusCode(500, new { message = "Errore durante il recupero dei post", error = ex.Message });
+                TempData["ErrorMessage"] = "Utente non autenticato";
+                return RedirectToAction("Login", "Account");
             }
+            var createPostDto = new CreatePostDto();
+            ViewBag.Categories = await _categoryService.GetCategories();
+            return View("Create", createPostDto);
+
         }
 
-        [HttpGet("{postId:guid}")]
-        public async Task<IActionResult> GetById(Guid postId)
-        {
-            try
-            {
-                var post = await _postService.GetPostByIdAsync(postId);
-                if (post == null)
-                {
-                    return NotFound(new { message = "Post non trovato" });
-                }
 
-                return Ok(post);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Errore durante il recupero del post", error = ex.Message });
-            }
-        }
-
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetByUserId(string userId)
-        {
-            try
-            {
-                var posts = await _postService.GetPostsByUserIdAsync(userId);
-                if (posts == null || !posts.Any())
-                {
-                    return NotFound(new { message = "Nessun post trovato per questo utente" });
-                }
-
-                return Ok(posts);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Errore durante il recupero dei post dell'utente", error = ex.Message });
-            }
-        }
-
-        [HttpGet("my-posts")]
-        public async Task<IActionResult> GetMyPosts()
-        {
-            try
-            {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized(new { message = "Utente non autenticato" });
-                }
-
-                var posts = await _postService.GetPostsByUserIdAsync(userId);
-                if (posts == null || !posts.Any())
-                {
-                    return NotFound(new { message = "Non hai ancora pubblicato post" });
-                }
-
-                return Ok(posts);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Errore durante il recupero dei tuoi post", error = ex.Message });
-            }
-        }
-
-        [HttpPost]
+        [HttpPost("Create")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreatePost(CreatePostDto postDto)
+        public async Task<IActionResult> CreatePost([FromForm]CreatePostDto createPost)
         {
             if (!ModelState.IsValid)
             {
-                return await ReturnCreateViewWithCategoriesAsync(postDto);
+                return await ReturnCreateViewWithCategoriesAsync(createPost);
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
             {
-                ModelState.AddModelError("", "Utente non autenticato");
-                return await ReturnCreateViewWithCategoriesAsync(postDto);
+                TempData["ErrorMessage"] = "Utente non autenticato";
+                return RedirectToAction("Login", "Account");
             }
-
-            var postCreated = await _postService.CreatePostAsync(postDto, userId);
+            var postCreated = await _postService.CreatePostAsync(createPost, user.Id);
             if (!postCreated)
             {
                 ModelState.AddModelError("", "Errore durante la creazione del post");
-                return await ReturnCreateViewWithCategoriesAsync(postDto);
+                return await ReturnCreateViewWithCategoriesAsync(createPost);
             }
 
             TempData["SuccessMessage"] = "Post creato con successo!";
@@ -142,219 +158,180 @@ namespace PixelIt.Controllers
             return View("Create", postDto);
         }
 
-
-        // API per l'aggiornamento di un post
-        [HttpPut("{idPost:guid}")]
-        public async Task<IActionResult> Edit([FromForm] EditPostDto updatePost, Guid idPost)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                // Ottieni l'ID dell'utente corrente
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized(new { message = "Utente non autenticato" });
-                }
-
-                try
-                {
-                    var editPost = await _postService.EditPostAsync(updatePost, idPost, userId);
-                    if (!editPost)
-                    {
-                        return BadRequest(new { message = "Post non trovato o errore durante l'aggiornamento" });
-                    }
-                    return Ok(new { message = "Post aggiornato con successo" });
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    return Forbid();
-                }
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Errore durante l'aggiornamento del post", error = ex.Message });
-            }
-        }
-
         // Vista MVC per l'aggiornamento di un post
-        [HttpGet("edit/{idPost:guid}")]
-        public async Task<IActionResult> EditView(Guid idPost)
-        {
-            try
-            {
-                // Ottieni l'ID dell'utente corrente
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
-                {
-                    TempData["ErrorMessage"] = "Utente non autenticato";
-                    return RedirectToAction("Login", "Account");
-                }
+        //[HttpGet("edit/{idPost:guid}")]
+        //public async Task<IActionResult> EditView(Guid idPost)
+        //{
+        //    try
+        //    {
+        //        // Ottieni l'ID dell'utente corrente
+        //        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        //        if (string.IsNullOrEmpty(userId))
+        //        {
+        //            TempData["ErrorMessage"] = "Utente non autenticato";
+        //            return RedirectToAction("Login", "Account");
+        //        }
 
-                // Ottieni il post
-                var post = await _postService.GetPostByIdAsync(idPost);
-                if (post == null)
-                {
-                    TempData["ErrorMessage"] = "Post non trovato";
-                    return RedirectToAction("Index", "Home");
-                }
+        //        // Ottieni il post
+        //        var post = await _postService.GetPostByIdAsync(idPost);
+        //        if (post == null)
+        //        {
+        //            TempData["ErrorMessage"] = "Post non trovato";
+        //            return RedirectToAction("Index", "Home");
+        //        }
 
-                // Verifica che l'utente sia il proprietario del post
-                if (post.IdUser != userId)
-                {
-                    // Verifica se l'utente è un amministratore
-                    var user = await _userManager.FindByIdAsync(userId);
-                    if (user == null || !await _userManager.IsInRoleAsync(user, "Admin"))
-                    {
-                        TempData["ErrorMessage"] = "Non sei autorizzato a modificare questo post";
-                        return RedirectToAction("Index", "Home");
-                    }
-                }
+        //        // Verifica che l'utente sia il proprietario del post
+        //        if (post.IdUser != userId)
+        //        {
+        //            // Verifica se l'utente è un amministratore
+        //            var user = await _userManager.FindByIdAsync(userId);
+        //            if (user == null || !await _userManager.IsInRoleAsync(user, "Admin"))
+        //            {
+        //                TempData["ErrorMessage"] = "Non sei autorizzato a modificare questo post";
+        //                return RedirectToAction("Index", "Home");
+        //            }
+        //        }
 
-                // Prepara il DTO per l'aggiornamento
-                var editDto = new EditPostDto
-                {
-                    Description = post.Description,
-                    PostImage = post.PostImage,
-                    PostCategories = post.PostCategories
-                };
+        //        // Prepara il DTO per l'aggiornamento
+        //        var editDto = new EditPostDto
+        //        {
+        //            Description = post.Description,
+        //            PostImage = post.PostImage,
+        //            PostCategories = post.PostCategories
+        //        };
 
-                // Carica le categorie per la dropdown
-                ViewBag.Categories = await _categoryService.GetCategories();
-                ViewBag.PostId = idPost;
+        //        // Carica le categorie per la dropdown
+        //        ViewBag.Categories = await _categoryService.GetCategories();
+        //        ViewBag.PostId = idPost;
 
-                return View("Edit", editDto);
-            }
-            catch (Exception ex)
-            {
-                ViewBag.ErrorMessage = ex.Message;
-                return View("Error");
-            }
-        }
+        //        return View("Edit", editDto);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ViewBag.ErrorMessage = ex.Message;
+        //        return View("Error");
+        //    }
+        //}
 
-        // Action per l'aggiornamento di un post dalla form MVC
-        [HttpPost("edit/{idPost:guid}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPost(EditPostDto updatePost, Guid idPost)
-        {
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    // Ottieni l'ID dell'utente corrente
-                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (string.IsNullOrEmpty(userId))
-                    {
-                        TempData["ErrorMessage"] = "Utente non autenticato";
-                        return RedirectToAction("Login", "Account");
-                    }
+        //// Action per l'aggiornamento di un post dalla form MVC
+        //[HttpPost("edit/{idPost:guid}")]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> EditPost(EditPostDto updatePost, Guid idPost)
+        //{
+        //    try
+        //    {
+        //        if (ModelState.IsValid)
+        //        {
+        //            // Ottieni l'ID dell'utente corrente
+        //            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        //            if (string.IsNullOrEmpty(userId))
+        //            {
+        //                TempData["ErrorMessage"] = "Utente non autenticato";
+        //                return RedirectToAction("Login", "Account");
+        //            }
 
-                    try
-                    {
-                        var editPost = await _postService.EditPostAsync(updatePost, idPost, userId);
-                        if (editPost)
-                        {
-                            TempData["SuccessMessage"] = "Post aggiornato con successo!";
-                            return RedirectToAction("Index", "Home");
-                        }
+        //            try
+        //            {
+        //                var editPost = await _postService.EditPostAsync(updatePost, idPost, userId);
+        //                if (editPost)
+        //                {
+        //                    TempData["SuccessMessage"] = "Post aggiornato con successo!";
+        //                    return RedirectToAction("Index", "Home");
+        //                }
 
-                        ModelState.AddModelError("", "Errore durante l'aggiornamento del post");
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                        TempData["ErrorMessage"] = "Non sei autorizzato a modificare questo post";
-                        return RedirectToAction("Index", "Home");
-                    }
-                }
+        //                ModelState.AddModelError("", "Errore durante l'aggiornamento del post");
+        //            }
+        //            catch (UnauthorizedAccessException)
+        //            {
+        //                TempData["ErrorMessage"] = "Non sei autorizzato a modificare questo post";
+        //                return RedirectToAction("Index", "Home");
+        //            }
+        //        }
 
-                // Se arriviamo qui, c'è stato un errore
-                ViewBag.Categories = await _categoryService.GetCategories();
-                ViewBag.PostId = idPost;
-                return View("Edit", updatePost);
-            }
-            catch (Exception ex)
-            {
-                ViewBag.ErrorMessage = ex.Message;
-                return View("Error");
-            }
-        }
+        //        // Se arriviamo qui, c'è stato un errore
+        //        ViewBag.Categories = await _categoryService.GetCategories();
+        //        ViewBag.PostId = idPost;
+        //        return View("Edit", updatePost);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ViewBag.ErrorMessage = ex.Message;
+        //        return View("Error");
+        //    }
+        //}
 
-        // API per l'eliminazione di un post
-        [HttpDelete("{idPost:guid}")]
-        public async Task<IActionResult> Delete(Guid idPost)
-        {
-            try
-            {
-                // Ottieni l'ID dell'utente corrente
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized(new { message = "Utente non autenticato" });
-                }
+        //// API per l'eliminazione di un post
+        //[HttpDelete("{idPost:guid}")]
+        //public async Task<IActionResult> Delete(Guid idPost)
+        //{
+        //    try
+        //    {
+        //        // Ottieni l'ID dell'utente corrente
+        //        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        //        if (string.IsNullOrEmpty(userId))
+        //        {
+        //            return Unauthorized(new { message = "Utente non autenticato" });
+        //        }
 
-                try
-                {
-                    var deletePost = await _postService.DeletePostAsync(idPost, userId);
-                    if (!deletePost)
-                    {
-                        return NotFound(new { message = "Post non trovato" });
-                    }
-                    return Ok(new { message = "Post eliminato con successo" });
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    return Forbid();
-                }
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Errore durante l'eliminazione del post", error = ex.Message });
-            }
-        }
+        //        try
+        //        {
+        //            var deletePost = await _postService.DeletePostAsync(idPost, userId);
+        //            if (!deletePost)
+        //            {
+        //                return NotFound(new { message = "Post non trovato" });
+        //            }
+        //            return Ok(new { message = "Post eliminato con successo" });
+        //        }
+        //        catch (UnauthorizedAccessException)
+        //        {
+        //            return Forbid();
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { message = "Errore durante l'eliminazione del post", error = ex.Message });
+        //    }
+        //}
 
-        // Action per l'eliminazione di un post dalla form MVC
-        [HttpPost("delete/{idPost:guid}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeletePost(Guid idPost)
-        {
-            try
-            {
-                // Ottieni l'ID dell'utente corrente
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
-                {
-                    TempData["ErrorMessage"] = "Utente non autenticato";
-                    return RedirectToAction("Login", "Account");
-                }
+        //// Action per l'eliminazione di un post dalla form MVC
+        //[HttpPost("delete/{idPost:guid}")]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> DeletePost(Guid idPost)
+        //{
+        //    try
+        //    {
+        //        // Ottieni l'ID dell'utente corrente
+        //        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        //        if (string.IsNullOrEmpty(userId))
+        //        {
+        //            TempData["ErrorMessage"] = "Utente non autenticato";
+        //            return RedirectToAction("Login", "Account");
+        //        }
 
-                try
-                {
-                    var deletePost = await _postService.DeletePostAsync(idPost, userId);
-                    if (deletePost)
-                    {
-                        TempData["SuccessMessage"] = "Post eliminato con successo!";
-                    }
-                    else
-                    {
-                        TempData["ErrorMessage"] = "Post non trovato";
-                    }
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    TempData["ErrorMessage"] = "Non sei autorizzato a eliminare questo post";
-                }
+        //        try
+        //        {
+        //            var deletePost = await _postService.DeletePostAsync(idPost, userId);
+        //            if (deletePost)
+        //            {
+        //                TempData["SuccessMessage"] = "Post eliminato con successo!";
+        //            }
+        //            else
+        //            {
+        //                TempData["ErrorMessage"] = "Post non trovato";
+        //            }
+        //        }
+        //        catch (UnauthorizedAccessException)
+        //        {
+        //            TempData["ErrorMessage"] = "Non sei autorizzato a eliminare questo post";
+        //        }
 
-                return RedirectToAction("Index", "Home");
-            }
-            catch (Exception ex)
-            {
-                ViewBag.ErrorMessage = ex.Message;
-                return View("Error");
-            }
-        }
+        //        return RedirectToAction("Index", "Home");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ViewBag.ErrorMessage = ex.Message;
+        //        return View("Error");
+        //    }
+        //}
     }
 }

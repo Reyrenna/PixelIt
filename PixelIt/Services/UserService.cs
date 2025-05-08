@@ -1,12 +1,12 @@
 ﻿//using Microsoft.AspNetCore.Identity;
 //using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+//using Microsoft.AspNetCore.Mvc.ModelBinding;
 //using Microsoft.EntityFrameworkCore;
 //using PixelIt.Data;
 //using PixelIt.DTOs.Account;
 //using PixelIt.DTOs.Category;
 //using PixelIt.DTOs.Comment;
 //using PixelIt.DTOs.Follow;
-//using PixelIt.DTOs.ImageCollection;
 //using PixelIt.DTOs.Like;
 //using PixelIt.DTOs.Post;
 //using PixelIt.DTOs.PostCategory;
@@ -14,16 +14,16 @@
 
 //namespace PixelIt.Services
 //{
-//    public class UserService : IdentityUser
+//    public class UserService 
 //    {
 //        private readonly UserManager<ApplicationUser> _userManager;
-//        private readonly RoleManager<IdentityRole> _roleManager;
+//        private readonly RoleManager<ApplicationRole> _roleManager;
 //        private readonly SignInManager<ApplicationUser> _signInManager;
 //        private readonly ILogger<UserService> _logger;
 //        private readonly ApplicationDbContext _context;
 //        public UserService(
 //            UserManager<ApplicationUser> userManager,
-//            RoleManager<IdentityRole> roleManager,
+//            RoleManager<ApplicationRole> roleManager,
 //            SignInManager<ApplicationUser> signInManager,
 //            ILogger<UserService> logger,
 //            ApplicationDbContext context
@@ -35,15 +35,56 @@
 //            _logger = logger;
 //            _context = context;
 //        }
-//        public async Task<IdentityResult> CreateUserAsync(
-//            ApplicationUser user, 
+//        public async Task<(IdentityResult Result, ApplicationUser? User)> CreateUserAsync(
+//            CreateUserDto userDto,
 //            string password,
 //            IFormFile profilePicture,
+//            IFormFile verificationImage1,
+//            IFormFile verificationImage2,
 //            string roleName
 //            )
 //        {
+            
 //            try
 //            {
+//                if (verificationImage1 != null && verificationImage1.Length >0)
+//                {
+//                    User
+//                    var fileName = verificationImage1.FileName;
+//                    var UniqueFileName = Guid.NewGuid().ToString() + "_" + fileName;
+//                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "images collection", UniqueFileName);
+//                    var directory = Path.GetDirectoryName(filePath);
+//                    if (!Directory.Exists(directory))
+//                    {
+//                        Directory.CreateDirectory(directory);
+//                    }
+//                    await using (var stream = new FileStream(filePath, FileMode.Create))
+//                    {
+//                        await verificationImage1.CopyToAsync(stream);
+//                    }
+
+//                    var webRootPath = Path.Combine("uploads", "images collection", UniqueFileName);
+//                    user.VerificationImage1 = webRootPath;
+//                }
+
+//                if (verificationImage2 != null && verificationImage2.Length > 0)
+//                {
+//                    var fileName = verificationImage2.FileName;
+//                    var UniqueFileName = Guid.NewGuid().ToString() + "_" + fileName;
+//                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "images collection", UniqueFileName);
+//                    var directory = Path.GetDirectoryName(filePath);
+//                    if (!Directory.Exists(directory))
+//                    {
+//                        Directory.CreateDirectory(directory);
+//                    }
+//                    await using (var stream = new FileStream(filePath, FileMode.Create))
+//                    {
+//                        await verificationImage2.CopyToAsync(stream);
+//                    }
+//                    var webRootPath = Path.Combine("uploads", "images collection", UniqueFileName);
+//                    user.VerificationImage2 = webRootPath;
+//                }
+
 //                if (profilePicture != null && profilePicture.Length > 0)
 //                {
 //                    var fileName = profilePicture.FileName;
@@ -62,36 +103,57 @@
 //                    }
 
 //                    var webRootPath = Path.Combine("uploads", "profile images", UniqueFileName);
+//                    user.ProfilePicture = webRootPath;
 //                }
 //                else
 //                {
 //                    user.ProfilePicture = Path.Combine("uploads", "profile images", "default.png");
 //                }
-
-//                var newUser = new ApplicationUser : 
-//                {
-//                    Name = user.Name,
-//                    Surname = user.Surname,
-//                    Nickname = user.Nickname,
-//                    ProfileDescription = user.ProfileDescription,
-//                    ProfilePicture = user.ProfilePicture,
-//                    DateOfBirth = user.DateOfBirth,
-//                    DateOfRegistration = DateTime.UtcNow,
-//                };
                 
+//                var existingUser = await _userManager.FindByEmailAsync(user.Email);
+//                if (existingUser != null)
+//                {
 
-//                var result = await _userManager.CreateAsync(user, password);
+
+//                    var newUser = new ApplicationUser
+//                    {
+//                        UserName = userDto.Email,
+//                        Email = userDto.Email,
+//                        Name = userDto.Name,
+//                        Surname = userDto.Surname,
+//                        Nickname = userDto.Nickname,
+//                        ProfileDescription = userDto.ProfileDescription,
+//                        ProfilePicture = userDto.ProfilePicture,
+//                        DateOfBirth = userDto.DateOfBirth,
+//                        DateOfRegistration = DateTime.UtcNow,
+//                        VerificationImage1 = userDto.VerificationImage1,
+//                        VerificationImage2 = userDto.VerificationImage2,
+//                        EmailConfirmed = true,
+//                    };
+
+//                    var UserByEmail = await _userManager.FindByEmailAsync(user.Email);
+
+//                    if (UserByEmail.Email == newUser.Email && user != null)
+//                    {
+//                        await _userManager.AddToRoleAsync(user, "User");
+//                    }
+//                }
+//                else
+//                {
+//                    _logger.LogError($"The email {existingUser.Email} is already in use.");
+//                }
+
+//                    var result = await _userManager.CreateAsync(user, password);
 
 //                if (result.Succeeded)
 //                {
-//                    //RICOEDATI DI CAMBIARE IL RUOLO DI DEFAULT
-//                    await _userManager.AddToRoleAsync(user, "DefaultUser");
 //                    _logger.LogInformation($"User {user.UserName} created successfully.");
 //                }
 //                else
 //                {
 //                    _logger.LogError($"Error creating user {user.UserName}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
 //                }
+               
 //                return result;
 //            }
 //            catch (Exception ex)
@@ -99,7 +161,6 @@
 //                _logger.LogError(ex, $"Error creating user {user.UserName}: {ex.Message}");
 //                return IdentityResult.Failed(new IdentityError { Description = ex.Message });
 //            }
-
 
 //        }
 
@@ -109,7 +170,6 @@
 //            {
 //                var users = await _context
 //                    .Users
-//                    .Include(u => u.ImageCollections)
 //                    .Include(u => u.Posts)
 //                    .Include(u => u.Comments)
 //                    .Include(u => u.Likes)
@@ -129,15 +189,6 @@
 //                    ProfilePicture = u.ProfilePicture,
 //                    DateOfBirth = u.DateOfBirth,
 //                    DateOfRegistration = u.DateOfRegistration,
-//                    ImageCollections = (ICollection<ImageCollectionSimpleDto>)u.ImageCollections.Select(ic => new GetImageCollectionDto
-//                    {
-//                        IdImageCollection = ic.IdImageCollection,
-//                        Image1 = ic.Image1,
-//                        Image2 = ic.Image2,
-//                        Image3 = ic.Image3,
-//                        Image4 = ic.Image4,
-//                        Image5 = ic.Image5,
-//                    }).ToList(),
 //                    Posts = u.Posts.Select(p => new PostSimpleDto
 //                    {
 //                        IdPost = p.IdPost,
@@ -148,7 +199,7 @@
 //                        {
 //                            CategoryId = pc.CategoryId,
 //                            PostId = pc.PostId,
-//                            Category = new List<GetCategoriesDto> 
+//                            Category = new List<GetCategoriesDto>
 //                            {
 //                                new GetCategoriesDto
 //                                {

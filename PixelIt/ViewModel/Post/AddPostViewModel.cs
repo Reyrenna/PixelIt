@@ -7,6 +7,6 @@ namespace PixelIt.ViewModel.Post
     {
        public CreatePostDto Post { get; set; } 
 
-       public CreateCategoryDto Category { get; set; }
+       public CreateCategoryDto Categories { get; set; }
     }
 }

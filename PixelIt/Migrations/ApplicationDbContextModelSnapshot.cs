@@ -138,6 +138,26 @@ namespace PixelIt.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "1",
+                            Name = "Manager",
+                            NormalizedName = "MANAGER"
+                        },
+                        new
+                        {
+                            Id = "2",
+                            Name = "User",
+                            NormalizedName = "USER"
+                        },
+                        new
+                        {
+                            Id = "3",
+                            Name = "Photographer",
+                            NormalizedName = "PHOTOGRAPHER"
+                        });
                 });
 
             modelBuilder.Entity("PixelIt.Models.ApplicationUser", b =>
@@ -202,7 +222,6 @@ namespace PixelIt.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ProfilePicture")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
@@ -219,6 +238,12 @@ namespace PixelIt.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("VerificationImage1")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VerificationImage2")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -318,38 +343,6 @@ namespace PixelIt.Migrations
                     b.ToTable("Follows");
                 });
 
-            modelBuilder.Entity("PixelIt.Models.ImageCollection", b =>
-                {
-                    b.Property<Guid>("IdImageCollection")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("IdUser")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Image1")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Image2")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Image3")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Image4")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Image5")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("IdImageCollection");
-
-                    b.HasIndex("IdUser");
-
-                    b.ToTable("ImageCollections");
-                });
-
             modelBuilder.Entity("PixelIt.Models.Like", b =>
                 {
                     b.Property<Guid>("IdLike")
@@ -396,7 +389,6 @@ namespace PixelIt.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("NewPostImage")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("PostDate")
@@ -530,17 +522,6 @@ namespace PixelIt.Migrations
                     b.Navigation("Follower");
                 });
 
-            modelBuilder.Entity("PixelIt.Models.ImageCollection", b =>
-                {
-                    b.HasOne("PixelIt.Models.ApplicationUser", "User")
-                        .WithMany("ImageCollections")
-                        .HasForeignKey("IdUser")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("PixelIt.Models.Like", b =>
                 {
                     b.HasOne("PixelIt.Models.Post", "Post")
@@ -602,8 +583,6 @@ namespace PixelIt.Migrations
                     b.Navigation("Followers");
 
                     b.Navigation("Followings");
-
-                    b.Navigation("ImageCollections");
 
                     b.Navigation("Likes");
 

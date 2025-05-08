@@ -1,0 +1,24 @@
+﻿@using PixelIt.ViewModel.User
+@model LogInViewModel
+
+@{
+	ViewData["Title"] = "Log In";
+}
+
+<form asp-controller="User" asp-action="LoginUser" method="post" class="container">
+	@Html.AntiForgeryToken()
+	<div class="mb-3">
+		<label asp-for="LogInUser.Email" class="form-label"></label>
+		<input asp-for="LogInUser.Email" type="email" class="form-control" />
+		<span asp-validation-for="LogInUser.Email" class="text-danger"></span>	
+	</div>
+	<div class="mb-3">
+		<label asp-for="LogInUser.Password" class="form-label"></label>
+		<input asp-for="LogInUser.Password" type="password" class="form-control" />
+		<span asp-validation-for="LogInUser.Password" class="text-danger"></span>
+	</div>
+	<div class="d-flex justify-content-between">
+		<button type="submit" class="btn btn-primary">LogIn</button>
+		<a asp-action="Index" asp-controller="Home" class="btn btn-secondary">Torna alla Home</a>
+	</div>
+</form>

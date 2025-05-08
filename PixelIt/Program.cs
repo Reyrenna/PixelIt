@@ -43,11 +43,10 @@ builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<CommentService>();
 builder.Services.AddScoped<LikeService>();
 builder.Services.AddScoped<FollowService>();
-builder.Services.AddScoped<ImageCollectionService>();
 
 
 builder
-    .Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+    .Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     {
         //options.SignIn.RequireConfirmedAccount = builder
         //    .Configuration.GetSection("Identity")
@@ -65,9 +64,7 @@ builder
         //    .Configuration.GetSection("Identity")
         //    .GetValue<bool>("RequireLowercase");
 
-        //options.Password.RequireNonAlphanumeric = builder
-        //    .Configuration.GetSection("Identity")
-        //    .GetValue<bool>("RequireNonAlphanumeric");
+        options.Password.RequireNonAlphanumeric = false;
 
         options.Password.RequireUppercase = builder
             .Configuration.GetSection("Identity")

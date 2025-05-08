@@ -20,7 +20,6 @@ namespace PixelIt.Data
             : base(options)
         {
         }
-        public DbSet<ImageCollection> ImageCollections { get; set; }
         public DbSet<Follow> Follows { get; set; }
         public DbSet<Like> Likes { get; set; }
         public DbSet<Post> Posts { get; set; }
@@ -46,13 +45,6 @@ namespace PixelIt.Data
                 .HasOne(ur => ur.Role)
                 .WithMany(ur => ur.UserRoles)
                 .HasForeignKey(ur => ur.RoleId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            builder
-                .Entity<ApplicationUser>()
-                .HasMany(ic => ic.ImageCollections)
-                .WithOne(u => u.User)
-                .HasForeignKey(ic => ic.IdUser)
                 .OnDelete(DeleteBehavior.NoAction);
 
             builder
@@ -117,6 +109,28 @@ namespace PixelIt.Data
                 .WithMany(pc => pc.PostCategories)
                 .HasForeignKey(c => c.CategoryId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<ApplicationRole>().HasData(
+                new ApplicationRole
+                {
+                    Id = "1",
+                    Name = "Manager",
+                    NormalizedName = "MANAGER",
+                },
+                new ApplicationRole
+                {
+                    Id = "2",
+                    Name = "User",
+                    NormalizedName = "USER",
+                },
+                new ApplicationRole
+                {
+                    Id = "3",
+                    Name = "Photographer",
+                    NormalizedName = "PHOTOGRAPHER",
+                }
+
+                );
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PixelIt.Data;
 using PixelIt.DTOs.Account;
@@ -14,10 +15,14 @@ namespace PixelIt.Services
     public class PostService
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly CategoryService _categoryService;
 
-        public PostService(ApplicationDbContext context)
+        public PostService(ApplicationDbContext context, UserManager<ApplicationUser> userManager, CategoryService categoryService)
         {
             _context = context;
+            _userManager = userManager;
+            _categoryService = categoryService;
         }
 
         // Servizio per il salvataggio asincrono del Post
@@ -71,17 +76,11 @@ namespace PixelIt.Services
                             Nickname = p.User.Nickname,
                             ProfilePicture = p.User.ProfilePicture
                         },
-                        PostCategories = p.PostCategories.Select(c => new PostCategorySimpleDto()
-                        {
-                            Category = new List<GetCategoriesDto>
-                            {
-                                new GetCategoriesDto
+                        PostCategories = p.PostCategories.Select(c =>  new GetCategoriesDto
                                 {
                                     IdCategory = c.Category.IdCategory, // Aggiunto IdCategory
-                                    CategoryName = c.Category.CategoryName
-                                }
-                            }
-                        }).ToList(),
+                            CategoryName = c.Category.CategoryName
+                               }).ToList(),
                         Likes = p.Likes.Select(l => new LikeSimpleDto()
                         {
                             IdLike = l.IdLike, // Aggiunto IdLike
@@ -156,17 +155,12 @@ namespace PixelIt.Services
                         Nickname = post.User.Nickname,
                         ProfilePicture = post.User.ProfilePicture
                     },
-                    PostCategories = post.PostCategories.Select(c => new PostCategorySimpleDto()
-                    {
-                        Category = new List<GetCategoriesDto>
-                        {
-                            new GetCategoriesDto
+                    PostCategories = post.PostCategories.Select(c => new GetCategoriesDto
                             {
                                 IdCategory = c.Category.IdCategory,
                                 CategoryName = c.Category.CategoryName
-                            }
-                        }
-                    }).ToList(),
+                            
+                        }).ToList(),
                     Likes = post.Likes.Select(l => new LikeSimpleDto()
                     {
                         IdLike = l.IdLike,
@@ -238,16 +232,10 @@ namespace PixelIt.Services
                         Nickname = p.User.Nickname,
                         ProfilePicture = p.User.ProfilePicture
                     },
-                    PostCategories = p.PostCategories.Select(c => new PostCategorySimpleDto()
-                    {
-                        Category = new List<GetCategoriesDto>
-                        {
-                            new GetCategoriesDto
+                    PostCategories = p.PostCategories.Select(c =>  new GetCategoriesDto
                             {
                                 IdCategory = c.Category.IdCategory,
                                 CategoryName = c.Category.CategoryName
-                            }
-                        }
                     }).ToList(),
                     Likes = p.Likes.Select(l => new LikeSimpleDto()
                     {
@@ -317,29 +305,24 @@ namespace PixelIt.Services
 
                     webRootPath = Path.Combine("uploads", "images", uniqueFileName);
                 }
-
+                var newCategory = new Category();
                 var newPost = new Post()
                 {
                     IdPost = Guid.NewGuid(),
                     Description = createPost.Description,
                     PostDate = DateTime.UtcNow,
                     PostImage = webRootPath,
-                    IdUser = userId,
-                    PostCategories = new List<PostCategory>()
+                    IdUser = userId
                 };
 
                 // Aggiunta delle categorie esistenti
-                if (createPost.PostCategories != null && createPost.PostCategories.Any())
+                if (createPost.PostCategories != null && createPost.Categories.Count > 0)
                 {
-                    foreach (var pcDto in createPost.PostCategories)
+                    foreach (var pcDto in createPost.Categories)
                     {
-                        if (pcDto.Category != null && pcDto.Category.Any())
-                        {
-                            foreach (var catDto in pcDto.Category)
-                            {
                                 // Controlla se la categoria esiste già
                                 var existingCategory = await _context.Categories
-                                    .FirstOrDefaultAsync(c => c.CategoryName == catDto.CategoryName);
+                                    .FirstOrDefaultAsync(c => c.CategoryName == pcDto.CategoryName);
 
                                 if (existingCategory == null)
                                 {
@@ -347,7 +330,7 @@ namespace PixelIt.Services
                                     existingCategory = new Category
                                     {
                                         IdCategory = Guid.NewGuid(),
-                                        CategoryName = catDto.CategoryName
+                                        CategoryName = pcDto.CategoryName
                                     };
                                     _context.Categories.Add(existingCategory);
                                 }
@@ -359,8 +342,6 @@ namespace PixelIt.Services
                                     CategoryId = existingCategory.IdCategory
                                 });
                             }
-                        }
-                    }
                 }
 
                 // Aggiungi il post al contesto

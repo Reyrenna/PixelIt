@@ -1,7 +1,6 @@
 ﻿using PixelIt.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using PixelIt.DTOs.ImageCollection;
 using PixelIt.DTOs.Post;
 using PixelIt.DTOs.Comment;
 using PixelIt.DTOs.Like;
@@ -29,12 +28,10 @@ namespace PixelIt.DTOs.Account
         public required string ProfilePicture { get; set; }
 
         [Required]
-        public required DateOnly DateOfBirth { get; set; }
+        public required DateTime DateOfBirth { get; set; }
 
         [Required]
         public required DateTime DateOfRegistration { get; set; }
-
-        public virtual ICollection<ImageCollectionSimpleDto>? ImageCollections { get; set; }
 
         public virtual ICollection<PostSimpleDto>? Posts { get; set; }
 
