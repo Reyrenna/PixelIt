@@ -16,6 +16,10 @@ namespace PixelIt.ViewModel.Post
         public required string Description { get; set; }
 
         [Required]
+
+        public string ProfileImage { get; set; }
+
+        [Required]
         public string IdUser { get; set; }
 
         [Required]

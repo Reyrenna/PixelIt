@@ -82,6 +82,7 @@ namespace PixelIt.Services
                         IdPost = p.IdPost,
                         PostImage = p.PostImage,
                         Description = p.Description,
+                        ProfileImage = p.User.ProfilePicture,
                         IdUser = p.IdUser,
                         User = new UserPostDto()
                         {

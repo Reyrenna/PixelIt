@@ -213,23 +213,7 @@ namespace PixelIt.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Index(GetPostViewModel getPost)
-        {
-            try
-            {
-                var posts = await _postService.GetPostView();
-                if (posts == null || !posts.Any())
-                {
-                    return NotFound(new { message = "Nessun post trovato" });
-                }
-                return View("Index", posts);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Errore durante il recupero dei post", error = ex.Message });
-            }
-        }
+        
         //private async Task<IActionResult> ReturnCreateViewWithCategoriesAsync(CreatePostDto postDto)
         //{
         //    ViewBag.Categories = await _categoryService.GetCategories();
